@@ -1,7 +1,7 @@
 import json
 import os
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 
 # Set the initial theme
 ctk.set_appearance_mode("Dark")  
@@ -54,6 +54,7 @@ class SentinelUI(ctk.CTk):
         self.placeholder_label.grid(row=0, column=0, pady=200)
 
         self.edit_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.edit_frame.grid_columnconfigure(0, weight=1)
         
         # Rule Name Input
         self.rule_name_label = ctk.CTkLabel(self.edit_frame, text="Rule Name (e.g., CollegeDocs):")
@@ -61,27 +62,53 @@ class SentinelUI(ctk.CTk):
         self.rule_name_entry = ctk.CTkEntry(self.edit_frame, width=400)
         self.rule_name_entry.grid(row=1, column=0, padx=20, pady=5, sticky="w")
 
+        # Source Input
+        self.source_label = ctk.CTkLabel(self.edit_frame, text="Source Folder Path:")
+        self.source_label.grid(row=2, column=0, padx=20, pady=(10, 5), sticky="w")
+        self.source_frame = ctk.CTkFrame(self.edit_frame, fg_color="transparent")
+        self.source_frame.grid(row=3, column=0, padx=20, pady=5, sticky="ew")
+        self.source_frame.grid_columnconfigure(0, weight=1)
+        self.source_entry = ctk.CTkEntry(self.source_frame, width=600)
+        self.source_entry.grid(row=0, column=0, sticky="ew")
+        self.source_browse_btn = ctk.CTkButton(
+            self.source_frame,
+            text="Browse",
+            width=120,
+            command=lambda: self.browse_directory(self.source_entry),
+        )
+        self.source_browse_btn.grid(row=0, column=1, padx=(10, 0))
+
         # Destination Input
         self.dest_label = ctk.CTkLabel(self.edit_frame, text="Destination Folder Path:")
-        self.dest_label.grid(row=2, column=0, padx=20, pady=(10, 5), sticky="w")
-        self.dest_entry = ctk.CTkEntry(self.edit_frame, width=600)
-        self.dest_entry.grid(row=3, column=0, padx=20, pady=5, sticky="w")
+        self.dest_label.grid(row=4, column=0, padx=20, pady=(10, 5), sticky="w")
+        self.dest_frame = ctk.CTkFrame(self.edit_frame, fg_color="transparent")
+        self.dest_frame.grid(row=5, column=0, padx=20, pady=5, sticky="ew")
+        self.dest_frame.grid_columnconfigure(0, weight=1)
+        self.dest_entry = ctk.CTkEntry(self.dest_frame, width=600)
+        self.dest_entry.grid(row=0, column=0, sticky="ew")
+        self.dest_browse_btn = ctk.CTkButton(
+            self.dest_frame,
+            text="Browse",
+            width=120,
+            command=lambda: self.browse_directory(self.dest_entry),
+        )
+        self.dest_browse_btn.grid(row=0, column=1, padx=(10, 0))
 
         # Extensions Input
         self.ext_label = ctk.CTkLabel(self.edit_frame, text="Extensions (comma separated, e.g., .pdf, .docx):")
-        self.ext_label.grid(row=4, column=0, padx=20, pady=(10, 5), sticky="w")
+        self.ext_label.grid(row=6, column=0, padx=20, pady=(10, 5), sticky="w")
         self.ext_entry = ctk.CTkEntry(self.edit_frame, width=600)
-        self.ext_entry.grid(row=5, column=0, padx=20, pady=5, sticky="w")
+        self.ext_entry.grid(row=7, column=0, padx=20, pady=5, sticky="ew")
 
         # Keywords Input
         self.keyword_label = ctk.CTkLabel(self.edit_frame, text="Keywords (comma separated, e.g., assign, report):")
-        self.keyword_label.grid(row=6, column=0, padx=20, pady=(10, 5), sticky="w")
+        self.keyword_label.grid(row=8, column=0, padx=20, pady=(10, 5), sticky="w")
         self.keyword_entry = ctk.CTkEntry(self.edit_frame, width=600)
-        self.keyword_entry.grid(row=7, column=0, padx=20, pady=5, sticky="w")
+        self.keyword_entry.grid(row=9, column=0, padx=20, pady=5, sticky="ew")
 
         # Save & Delete Buttons
         self.btn_frame = ctk.CTkFrame(self.edit_frame, fg_color="transparent")
-        self.btn_frame.grid(row=8, column=0, padx=20, pady=30, sticky="w")
+        self.btn_frame.grid(row=10, column=0, padx=20, pady=30, sticky="w")
         
         self.save_btn = ctk.CTkButton(self.btn_frame, text="Save Configuration", fg_color="green", hover_color="darkgreen", command=self.save_config)
         self.save_btn.grid(row=0, column=0, padx=(0, 10))
@@ -116,12 +143,14 @@ class SentinelUI(ctk.CTk):
 
         # Clear fields
         self.rule_name_entry.delete(0, 'end')
+        self.source_entry.delete(0, 'end')
         self.dest_entry.delete(0, 'end')
         self.ext_entry.delete(0, 'end')
         self.keyword_entry.delete(0, 'end')
 
         # Populate fields
         self.rule_name_entry.insert(0, rule_name)
+        self.source_entry.insert(0, self.config_data.get("watch_directory", ""))
         self.dest_entry.insert(0, self.config_data["destinations"].get(rule_name, ""))
         
         exts = self.config_data["rules"][rule_name].get("extensions", [])
@@ -136,22 +165,38 @@ class SentinelUI(ctk.CTk):
         self.edit_frame.grid(row=0, column=0, sticky="nsew")
         
         self.rule_name_entry.delete(0, 'end')
+        self.source_entry.delete(0, 'end')
         self.dest_entry.delete(0, 'end')
         self.ext_entry.delete(0, 'end')
         self.keyword_entry.delete(0, 'end')
         self.rule_name_entry.insert(0, "NewRule")
+        self.source_entry.insert(0, self.config_data.get("watch_directory", ""))
+
+    def browse_directory(self, entry_widget):
+        current_path = entry_widget.get().strip()
+        initial_dir = os.path.expanduser(current_path) if current_path else os.path.expanduser("~")
+        selected_dir = filedialog.askdirectory(initialdir=initial_dir)
+
+        if selected_dir:
+            entry_widget.delete(0, 'end')
+            entry_widget.insert(0, selected_dir)
 
     def save_config(self):
         if not self.current_rule:
             return
 
         new_name = self.rule_name_entry.get().strip()
+        source_dir = self.source_entry.get().strip()
         dest = self.dest_entry.get().strip()
         exts = [x.strip() for x in self.ext_entry.get().split(',') if x.strip()]
         keywords = [x.strip() for x in self.keyword_entry.get().split(',') if x.strip()]
 
         if not new_name:
             messagebox.showerror("Error", "Rule Name cannot be empty.")
+            return
+
+        if not source_dir:
+            messagebox.showerror("Error", "Source Folder Path cannot be empty.")
             return
 
         # If name changed, remove the old one
@@ -161,6 +206,7 @@ class SentinelUI(ctk.CTk):
                 del self.config_data["destinations"][self.current_rule]
 
         # Update JSON structures
+        self.config_data["watch_directory"] = source_dir
         self.config_data["rules"][new_name] = {"extensions": exts, "keywords": keywords}
         self.config_data["destinations"][new_name] = dest
 
