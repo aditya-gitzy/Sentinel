@@ -1,5 +1,5 @@
 {
-  "watch_directory": "~/Downloads",
+  "watch_directory": "~/Documents/File Organiser",
   "settle_seconds": 3,
   "rules": {
     "CollegeDocs": {
@@ -28,14 +28,7 @@
       "keywords": []
     },
     "GeneralDocs": {
-      "extensions": [
-        ".pdf",
-        ".docx",
-        ".doc",
-        ".txt",
-        ".xlsx",
-        ".pptx"
-      ],
+      "extensions": [],
       "keywords": []
     },
     "Code": {
@@ -53,13 +46,15 @@
     "projects": {
       "extensions": [
         ".html",
-        ".py"
+        ".py",
+        ".txt"
       ],
       "keywords": [
         "project",
         "pro",
         "prjct",
-        "pp"
+        "pp",
+        "proj"
       ]
     },
     "anime": {
@@ -89,13 +84,13 @@
     }
   },
   "destinations": {
-    "CollegeDocs": "~/Documents/College_Assignments",
-    "Images": "~/Pictures/Saved",
-    "GeneralDocs": "~/Documents/General",
-    "Code": "~/Documents/Development",
-    "Others": "~/Documents/Unsorted",
-    "projects": "D:/Pro",
-    "anime": "D:/mine",
-    "failure": "D:\\tmp"
+    "CollegeDocs": "~/Documents/File Organiser/College_Assignments",
+    "Images": "~/Documents/File Organiser/Images",
+    "GeneralDocs": "~/Documents/File Organiser/General",
+    "Code": "~/Documents/File Organiser/Development",
+    "Others": "~/Documents/File Organiser/Unsorted",
+    "projects": "~/Documents/File Organiser/Projects",
+    "anime": "~/Documents/File Organiser/mine",
+    "failure": "~/Documents/File Organiser/tmp"
   }
 }
