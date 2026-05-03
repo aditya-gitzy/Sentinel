@@ -18,3 +18,13 @@
 2026-05-02 21:55:14,933 - INFO - Successfully moved: dem.html -> C:\Users\LENOVO\Documents\Development\dem.html
 2026-05-02 22:07:14,637 - INFO - Sentinel started watching: C:\Users\LENOVO\Downloads
 2026-05-02 22:07:32,272 - INFO - Successfully moved: ran.txt -> D:\tmp\ran.txt
+2026-05-03 19:37:57,590 - INFO - Sentinel started watching: c:\Users\Dell\Documents\File Organiser
+2026-05-03 19:38:23,704 - INFO - Successfully moved: proj.txt -> c:\Users\Dell\Documents\File Organiser\General\proj.txt
+2026-05-03 19:38:49,646 - INFO - Successfully moved: Screenshot 2026-05-03 193541.png -> c:\Users\Dell\Documents\File Organiser\Images\Screenshot 2026-05-03 193541.png
+2026-05-03 19:39:48,523 - INFO - Successfully moved: proj.txt -> c:\Users\Dell\Documents\File Organiser\General\proj.txt
+2026-05-03 19:40:31,210 - INFO - Successfully moved: project.txt -> c:\Users\Dell\Documents\File Organiser\College_Assignments\project.txt
+2026-05-03 19:52:55,147 - INFO - Sentinel started watching: c:\Users\Dell\Documents\File Organiser
+2026-05-03 19:53:16,231 - INFO - Successfully moved: proj.txt -> c:\Users\Dell\Documents\File Organiser\Unsorted\proj.txt
+2026-05-03 19:55:07,714 - INFO - Successfully moved: proj.txt -> c:\Users\Dell\Documents\File Organiser\Pro\proj.txt
+2026-05-03 19:56:29,634 - INFO - Successfully moved: proj.txt -> c:\Users\Dell\Documents\File Organiser\Projects\proj.txt
+2026-05-03 20:00:22,089 - INFO - Successfully moved: Screenshot 2026-05-03 193541.png -> C:\Users\Dell\Documents\File Organiser\Images\Screenshot 2026-05-03 193541_1.png
