@@ -1,5 +1,7 @@
 import json
 import os
+import subprocess
+import sys
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 
@@ -15,9 +17,11 @@ class SentinelUI(ctk.CTk):
 
         self.title("Sentinel Config Manager")
         self.geometry("900x600")
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
         
         self.config_data = self.load_config()
         self.current_rule = None
+        self.sentinel_process = None
 
         # --- Grid Layout ---
         self.grid_rowconfigure(0, weight=1)
@@ -26,7 +30,7 @@ class SentinelUI(ctk.CTk):
         # --- Sidebar (Automator Vibe) ---
         self.sidebar_frame = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
+        self.sidebar_frame.grid_rowconfigure(1, weight=1)
 
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Sentinel Rules", font=ctk.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
@@ -37,6 +41,22 @@ class SentinelUI(ctk.CTk):
         
         self.add_rule_btn = ctk.CTkButton(self.sidebar_frame, text="+ Add New Rule", command=self.add_new_rule)
         self.add_rule_btn.grid(row=2, column=0, padx=20, pady=10)
+
+        self.run_btn = ctk.CTkButton(
+            self.sidebar_frame,
+            text="Run Sentinel",
+            fg_color="green",
+            hover_color="darkgreen",
+            command=self.toggle_sentinel,
+        )
+        self.run_btn.grid(row=3, column=0, padx=20, pady=(0, 10))
+
+        self.run_status_label = ctk.CTkLabel(
+            self.sidebar_frame,
+            text="Status: Stopped",
+            anchor="w",
+        )
+        self.run_status_label.grid(row=4, column=0, padx=20, pady=(0, 10), sticky="w")
 
         # Theme Toggle
         self.appearance_mode_label = ctk.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
@@ -182,8 +202,14 @@ class SentinelUI(ctk.CTk):
             entry_widget.insert(0, selected_dir)
 
     def save_config(self):
+        if self.persist_config(show_feedback=True):
+            messagebox.showinfo("Saved", f"Configuration for '{self.current_rule}' saved successfully!")
+
+    def persist_config(self, show_feedback=False):
         if not self.current_rule:
-            return
+            if show_feedback:
+                messagebox.showerror("Error", "Select or create a rule before saving.")
+            return False
 
         new_name = self.rule_name_entry.get().strip()
         source_dir = self.source_entry.get().strip()
@@ -193,11 +219,11 @@ class SentinelUI(ctk.CTk):
 
         if not new_name:
             messagebox.showerror("Error", "Rule Name cannot be empty.")
-            return
+            return False
 
         if not source_dir:
             messagebox.showerror("Error", "Source Folder Path cannot be empty.")
-            return
+            return False
 
         # If name changed, remove the old one
         if self.current_rule != new_name and self.current_rule in self.config_data["rules"]:
@@ -210,15 +236,12 @@ class SentinelUI(ctk.CTk):
         self.config_data["rules"][new_name] = {"extensions": exts, "keywords": keywords}
         self.config_data["destinations"][new_name] = dest
 
-        # Write to file
         with open(CONFIG_PATH, 'w') as f:
             json.dump(self.config_data, f, indent=2)
 
         self.current_rule = new_name
         self.refresh_sidebar()
-        
-        # Super simple status feedback
-        messagebox.showinfo("Saved", f"Configuration for '{new_name}' saved successfully!")
+        return True
 
     def delete_rule(self):
         if self.current_rule and self.current_rule in self.config_data["rules"]:
@@ -236,6 +259,93 @@ class SentinelUI(ctk.CTk):
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
+
+    def toggle_sentinel(self):
+        if self.sentinel_is_running():
+            self.stop_sentinel()
+        else:
+            self.start_sentinel()
+
+    def start_sentinel(self):
+        if self.current_rule and not self.persist_config():
+            return
+
+        if not self.config_data.get("watch_directory") or not self.config_data.get("rules"):
+            messagebox.showerror(
+                "Configuration Required",
+                "Add and save at least one rule with a source folder before running Sentinel.",
+            )
+            return
+
+        if self.sentinel_is_running():
+            self.update_run_status("Running", "Stop Sentinel", "red", "darkred")
+            return
+
+        main_path = os.path.join(os.path.dirname(__file__), "main.py")
+        startupinfo = None
+        creationflags = 0
+
+        if os.name == "nt":
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+        try:
+            self.sentinel_process = subprocess.Popen(
+                [sys.executable, main_path],
+                cwd=os.path.dirname(__file__),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                startupinfo=startupinfo,
+                creationflags=creationflags,
+            )
+        except OSError as exc:
+            self.sentinel_process = None
+            self.update_run_status("Failed to start", "Run Sentinel", "green", "darkgreen")
+            messagebox.showerror("Launch Failed", f"Could not start Sentinel.\n\n{exc}")
+            return
+
+        self.update_run_status("Running", "Stop Sentinel", "red", "darkred")
+        self.after(1000, self.poll_sentinel_process)
+
+    def stop_sentinel(self):
+        if self.sentinel_process and self.sentinel_process.poll() is None:
+            self.sentinel_process.terminate()
+            try:
+                self.sentinel_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.sentinel_process.kill()
+                self.sentinel_process.wait(timeout=5)
+
+        self.sentinel_process = None
+        self.update_run_status("Stopped", "Run Sentinel", "green", "darkgreen")
+
+    def sentinel_is_running(self):
+        return self.sentinel_process is not None and self.sentinel_process.poll() is None
+
+    def poll_sentinel_process(self):
+        if self.sentinel_is_running():
+            self.after(1000, self.poll_sentinel_process)
+            return
+
+        if self.sentinel_process is not None:
+            exit_code = self.sentinel_process.poll()
+            self.sentinel_process = None
+            self.update_run_status("Stopped", "Run Sentinel", "green", "darkgreen")
+
+            if exit_code not in (0, None):
+                messagebox.showwarning(
+                    "Sentinel Stopped",
+                    f"Sentinel exited with code {exit_code}. Check logs/sentinel.log for details.",
+                )
+
+    def update_run_status(self, status_text, button_text, button_color, hover_color):
+        self.run_status_label.configure(text=f"Status: {status_text}")
+        self.run_btn.configure(text=button_text, fg_color=button_color, hover_color=hover_color)
+
+    def on_close(self):
+        self.stop_sentinel()
+        self.destroy()
 
 if __name__ == "__main__":
     app = SentinelUI()
