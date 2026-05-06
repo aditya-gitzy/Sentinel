@@ -1,6 +1,5 @@
 # 🛡️ Sentinel: Advanced Real-Time File Automation
-
-    ### 🛠️ Tech Stack
+### 🛠️ Tech Stack
 
 <div align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
