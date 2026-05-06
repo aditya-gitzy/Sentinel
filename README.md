@@ -1,17 +1,16 @@
 # 🛡️ Sentinel: Advanced Real-Time File Automation
 
-<p align="center">
+### 🛠️ Tech Stack
 
-  ### 🛠️ Tech Stack
-</p>
-
-<p align="center">
+<div align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/Watchdog-API-FF6F00?style=for-the-badge" alt="Watchdog API" />
   <img src="https://img.shields.io/badge/CustomTkinter-GUI-1E1E1E?style=for-the-badge&logo=windowsterminal&logoColor=white" alt="CustomTkinter" />
   <img src="https://img.shields.io/badge/JSON-Persistence-000000?style=for-the-badge&logo=json&logoColor=white" alt="JSON" />
   <img src="https://img.shields.io/badge/License-MIT-F1C40F?style=for-the-badge" alt="License: MIT" />
-</p>
+</div>
+
+<br>
 
 Digital clutter is a nightmare, and relying on standard OS tools to clean it up usually means dealing with overwrites, corrupted active downloads, or rigid workflows. 
 
