@@ -1,7 +1,8 @@
 # 🛡️ Sentinel: Advanced Real-Time File Automation
 
 <p align="center">
-### 🛠️ Tech Stack
+
+  ### 🛠️ Tech Stack
 </p>
 
 <p align="center">
