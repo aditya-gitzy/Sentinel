@@ -4,3 +4,4 @@ dist/
 logs/
 *.spec
 config.json
+installer_output/
