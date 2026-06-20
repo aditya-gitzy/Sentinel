@@ -18,12 +18,33 @@ class SortHandler(FileSystemEventHandler):
 
     def process_file(self, file_path: str):
         # Stop infinite loops if destination is inside the watch folder
-        if "Sorted" in file_path or "Others" in file_path or "College" in file_path:
-            return
+        from pathlib import Path
+        try:
+            path_obj = Path(file_path).resolve()
+            
+            # Check if the file is inside any of the category subfolders
+            for category in self.rules.rules.keys():
+                raw_dest = self.rules.destinations.get(category)
+                if raw_dest:
+                    dest_dir = (self.rules.make_universal_path(raw_dest) / category).resolve()
+                    if dest_dir in path_obj.parents or path_obj == dest_dir:
+                        return
+
+            # Check if inside fallback Others subfolder
+            others_raw = self.rules.destinations.get('Others')
+            if others_raw:
+                others_dir = (self.rules.make_universal_path(others_raw) / "Others").resolve()
+                if others_dir in path_obj.parents or path_obj == others_dir:
+                    return
+            else:
+                others_dir = (self.rules.watch_dir / "Others").resolve()
+                if others_dir in path_obj.parents or path_obj == others_dir:
+                    return
+        except Exception as e:
+            logging.error(f"Loop prevention check error: {e}")
 
         if is_file_ready(file_path, self.rules.settle_time):
             dest = self.rules.resolve_destination(file_path)
-            from pathlib import Path
             safe_move(Path(file_path), dest)
 
 class SentinelWatcher:

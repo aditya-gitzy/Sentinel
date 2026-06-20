@@ -13,8 +13,11 @@ class RuleEngine:
         self.rules = self.config.get('rules', {})
         self.destinations = self.config.get('destinations', {})
 
-    def make_universal_path(self, raw_path: str) -> Path:
+    def make_universal_path(self, raw_path) -> Path:
         """Automatically converts your LENOVO paths into universal paths for any PC."""
+        if not raw_path:
+            return Path("~/Downloads").expanduser()
+        raw_path = str(raw_path)
         # Swap out your specific username for the universal '~' (Home Directory) symbol
         if "C:/Users/LENOVO" in raw_path:
             raw_path = raw_path.replace("C:/Users/LENOVO", "~")
@@ -39,8 +42,11 @@ class RuleEngine:
                 if valid_exts and ext not in valid_exts:
                     continue
                 if any(keyword.lower() in filename for keyword in keywords):
-                    raw_dest = self.destinations.get(category, self.destinations['Others'])
-                    return self.make_universal_path(raw_dest)
+                    raw_dest = self.destinations.get(category)
+                    if not raw_dest:
+                        raw_dest = self.destinations.get('Others')
+                    dest_path = self.make_universal_path(raw_dest)
+                    return dest_path / category
 
         # PASS 2: General Mode. Check rules that only rely on EXTENSIONS.
         for category, criteria in self.rules.items():
@@ -49,12 +55,18 @@ class RuleEngine:
 
             if not keywords:
                 if valid_exts and ext in valid_exts:
-                    raw_dest = self.destinations.get(category, self.destinations['Others'])
-                    return self.make_universal_path(raw_dest)
+                    raw_dest = self.destinations.get(category)
+                    if not raw_dest:
+                        raw_dest = self.destinations.get('Others')
+                    dest_path = self.make_universal_path(raw_dest)
+                    return dest_path / category
 
         # Fallback if nothing matches
         raw_dest = self.destinations.get('Others')
-        return self.make_universal_path(raw_dest)
+        if raw_dest:
+            return self.make_universal_path(raw_dest) / "Others"
+        else:
+            return self.watch_dir / "Others"
 
     @property
     def watch_dir(self) -> Path:
