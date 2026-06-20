@@ -70,6 +70,19 @@ class SentinelUI(ctk.CTk):
         self.minsize(1000, 700)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         
+        icon_path = os.path.join(APP_DIR, "Sentinel.ico")
+        if os.path.exists(icon_path):
+            self.iconbitmap(icon_path)
+            
+            # Fix Taskbar Icon on Windows
+            if os.name == 'nt':
+                try:
+                    import ctypes
+                    myappid = 'thegeeks.sentinel.ui.1.2' # arbitrary string
+                    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+                except Exception:
+                    pass
+        
         # --- State Variables ---
         self.config_data = self.load_config()
         self.current_rule = None
