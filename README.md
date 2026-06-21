@@ -1,60 +1,52 @@
-# 🛡️ Sentinel: Advanced Real-Time File Automation
 <div align="center">
 
-## Tech Stack
+# 🛡️ Sentinel
+### Advanced Real-Time File Automation
+
+*Drop a file. Sentinel handles the rest.*
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Watchdog](https://img.shields.io/badge/Watchdog-API-FF6F00?style=for-the-badge)](https://pypi.org/project/watchdog/)
+[![CustomTkinter](https://img.shields.io/badge/CustomTkinter-GUI-1E1E1E?style=for-the-badge&logo=windowsterminal&logoColor=white)](https://github.com/TomSchimansky/CustomTkinter)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/aditya-gitzy/Sentinel/releases)
+[![License](https://img.shields.io/badge/License-MIT-F1C40F?style=for-the-badge)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/aditya-gitzy/Sentinel?style=for-the-badge&color=brightgreen&label=Latest)](https://github.com/aditya-gitzy/Sentinel/releases/latest)
 
 </div>
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/Watchdog-API-FF6F00?style=for-the-badge" alt="Watchdog API" />
-  <img src="https://img.shields.io/badge/CustomTkinter-GUI-1E1E1E?style=for-the-badge&logo=windowsterminal&logoColor=white" alt="CustomTkinter" />
-  <img src="https://img.shields.io/badge/JSON-Persistence-000000?style=for-the-badge&logo=json&logoColor=white" alt="JSON" />
-  <img src="https://img.shields.io/badge/License-MIT-F1C40F?style=for-the-badge" alt="License: MIT" />
-</div>
+---
 
-<br>
+Digital clutter is a nightmare. Standard OS tools either overwrite active downloads, corrupt in-progress transfers, or demand rigid folder structures you have to maintain manually.
 
-Digital clutter is a nightmare, and relying on standard OS tools to clean it up usually means dealing with overwrites, corrupted active downloads, or rigid workflows. 
-
-**Sentinel** is a highly resilient, cross-platform background daemon designed to solve this. It monitors your target directories in real-time and instantly routes incoming files to their proper destinations using an intelligent, two-pass JSON configuration engine. It runs completely invisibly, meaning you never have to manually sort a downloads folder again.
+**Sentinel** is a resilient background daemon that monitors your directories in real time and routes incoming files to the right place automatically — using a smart two-pass JSON rules engine. It runs completely invisibly. You never manually sort a folder again.
 
 ---
 
-### ✨ Key Features
+## ✨ Features
 
-* **Zero-Latency Monitoring:** Uses an event-driven observer pattern (`watchdog`) to detect files the millisecond they are created. Zero polling loops, zero wasted CPU.
-* **Defensive "Settle Time" Buffer:** Actively monitors byte-stream stability. It waits for OS file-locks to release before migrating, ensuring active downloads are never corrupted.
-* **Two-Pass Routing Engine:** Prioritizes strict keyword matching (e.g., routing files containing "assignment") before falling back to general extension-based sorting.
-* **Atomic Collision Avoidance:** Guarantees zero data loss. If a file with the same name exists, Sentinel dynamically calculates a unique path (e.g., appending a sequence number) rather than overwriting.
-* **Decoupled Headless UI:** Features a sleek, dark-mode graphical interface built with CustomTkinter to manage your sorting rules without interfering with the background daemon.
+* **Zero-latency monitoring** — Event-driven via `watchdog`. Files are detected the millisecond they're created. No polling, no wasted CPU.
 
----
+* **Settle-time buffer** — Sentinel watches byte-stream stability before moving anything. Active downloads are never touched mid-transfer.
 
-### 📂 Repository Structure
+* **Two-pass routing engine** — Keyword rules take priority (e.g. files containing `"assignment"` go straight to a specific folder), then extension-based sorting kicks in as a fallback.
 
-```text
-Sentinel/
-├── main.py                 # Core daemon boot script
-├── ui.py                   # CustomTkinter configuration dashboard
-├── config.json             # Dynamic rule registry (auto-generated)
-├── requirements.txt        # Project dependencies
-├── start_invisible.vbs     # Windows script for silent background execution
-├── logs/                   # System operation logs
-└── sorter/                 # Core logic modules
-    ├── __init__.py
-    ├── watcher.py          # Observer pattern implementation
-    ├── rules.py            # Two-pass routing engine
-    └── mover.py            # Atomic I/O and collision logic
-```
+* **Atomic collision avoidance** — If a file with the same name already exists at the destination, Sentinel auto-generates a unique path (appending a sequence number) instead of overwriting. Zero data loss, guaranteed.
+
+* **Decoupled headless UI** — A dark-mode CustomTkinter dashboard lets you manage all your sorting rules without ever touching the daemon process.
 
 ---
 
-### 🚀 Quick Start
+## 🚀 Getting Started
 
-**1. Clone the repository**
+### Option A — Windows Installer *(recommended)*
+
+Download the latest `Sentinel-v1.2.1-windows-x64.exe` from the [Releases page](https://github.com/aditya-gitzy/Sentinel/releases/latest) and run it. The installer handles everything — no Python required on the target machine.
+
+### Option B — Run from Source
+
+**1. Clone**
 ```bash
-git clone [https://github.com/aditya-gitzy/Sentinel.git](https://github.com/aditya-gitzy/Sentinel.git)
+git clone https://github.com/aditya-gitzy/Sentinel.git
 cd Sentinel
 ```
 
@@ -64,16 +56,85 @@ pip install -r requirements.txt
 ```
 
 **3. Configure your rules**
-Launch the visual dashboard to set up your target directories, extensions, and keywords.
+
+Launch the visual dashboard to define your target directories, file extensions, and keywords:
 ```bash
 python ui.py
 ```
 
-**4. Start the Sentinel Daemon**
-You can run it directly in your terminal to see the live output:
+**4. Start the daemon**
 ```bash
 python main.py
 ```
-*Tip for Windows Users:* To run Sentinel completely invisibly in the background without keeping a terminal window open, simply execute the `start_invisible.vbs` script.
+
+> **Windows tip:** Run `start_invisible.vbs` to launch Sentinel silently in the background with no terminal window.
 
 ---
+
+## 📂 Project Structure
+
+```
+Sentinel/
+├── main.py                 # Daemon entry point
+├── ui.py                   # CustomTkinter configuration dashboard
+├── config.json             # Rule registry (auto-generated on first run)
+├── requirements.txt        # Dependencies
+├── start_invisible.vbs     # Silent background launcher (Windows)
+├── Sentinel.ico            # App icon
+├── SentinelSetup.iss       # Inno Setup installer script
+├── logs/                   # Runtime operation logs
+└── sorter/                 # Core logic
+    ├── __init__.py
+    ├── watcher.py          # Watchdog observer implementation
+    ├── rules.py            # Two-pass routing engine
+    └── mover.py            # Atomic file I/O and collision handling
+```
+
+---
+
+## ⚙️ How the Rules Engine Works
+
+Sentinel processes every new file through two passes in order:
+
+```mermaid
+flowchart TD
+    A([📁 File Detected]) --> B{Pass 1: Keyword Match?}
+    B -- YES --> C[📂 Route to keyword-mapped folder]
+    B -- NO --> D{Pass 2: Extension Match?}
+    D -- YES --> E[📂 Route to extension-mapped folder]
+    D -- NO --> F[⏸️ Leave file in place]
+```
+
+Rules are stored in `config.json` and managed entirely through the UI — no manual JSON editing needed.
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|---|---|
+| File monitoring | `watchdog` (event-driven observer) |
+| GUI | `CustomTkinter` (dark-mode dashboard) |
+| Rule persistence | JSON |
+| Windows packaging | PyInstaller + Inno Setup 6 |
+| Silent launcher | VBScript |
+
+---
+
+## 📋 Requirements
+
+- Python 3.10+
+- Windows 10/11 or Linux
+- See `requirements.txt` for Python dependencies
+
+---
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome. If you hit a bug, open an [issue](https://github.com/aditya-gitzy/Sentinel/issues) with your OS, Python version, and the relevant section from `logs/`.
+
+---
+
+## 📄 License
+
+MIT © [Aditya Lande (aditya-gitzy)](https://github.com/aditya-gitzy)
